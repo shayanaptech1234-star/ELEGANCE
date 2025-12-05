@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Shop Luxury Designer Clothing Collection | ÉLÉGANCE Premium Fashion</title>
+    <meta name="description" content="Discover ÉLÉGANCE's exclusive luxury fashion collection.">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Montserrat:wght@300;400;500;600&display=swap');
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { font-family: 'Montserrat', sans-serif; overflow-x: hidden; }
+        .font-serif { font-family: 'Cormorant Garamond', serif; }
+        
+        /* Collection Intro Animation */
+        .intro-container {
+            position: fixed; inset: 0; background: #000; z-index: 9999;
+            display: flex; align-items: center; justify-content: center;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+        .intro-container.hidden { opacity: 0; visibility: hidden; }
+        .intro-content { text-align: center; position: relative; }
+        .intro-logo {
+            font-size: 5rem; font-weight: 300; letter-spacing: 0.5rem; color: #fff;
+            margin-bottom: 3rem; animation: logoReveal 1s ease-out forwards; opacity: 0;
+        }
+        .intro-divider {
+            width: 200px; height: 1px; background: #fff; margin: 0 auto 3rem;
+            transform: scaleX(0); animation: lineExpand 0.8s ease-out 1s forwards;
+        }
+        .intro-text {
+            font-size: 2rem; color: #fff; letter-spacing: 0.5rem; opacity: 0;
+            animation: textReveal 1s ease-out 1.5s forwards;
+        }
+        
+        @keyframes logoReveal { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes lineExpand { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+        @keyframes textReveal { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Scroll Animations (The "Alive" Factor) */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s cubic-bezier(0.5, 0, 0, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        html { scroll-behavior: smooth; }
+        
+        .nav-scrolled {
+            background: rgba(0, 0, 0, 0.95); backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .product-card {
+            position: relative; overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer; 
+        }
+        .product-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
+        .product-image { transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1); }
+        .product-card:hover .product-image { transform: scale(1.08); }
+        .product-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 60%);
+            opacity: 0; transition: opacity 0.4s;
+        }
+        .product-card:hover .product-overlay { opacity: 1; }
+        
+        .quick-view-btn {
+            position: absolute; bottom: 20px; left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            opacity: 0; transition: all 0.4s;
+        }
+        .product-card:hover .quick-view-btn { transform: translateX(-50%) translateY(0); opacity: 1; }
+        
+        .filter-btn { position: relative; overflow: hidden; }
+        .filter-btn.active { background: #000; color: #fff; }
+        .badge { position: absolute; top: 15px; right: 15px; z-index: 10; }
+
+        /* Modal Styles */
+        #productModal { transition: opacity 0.3s ease; }
+        #productModal.hidden { opacity: 0; pointer-events: none; }
+        #productModal:not(.hidden) { opacity: 1; pointer-events: auto; }
+        
+        .modal-content-wrapper {
+            transform: translateY(20px); transition: transform 0.4s ease-out;
+        }
+        #productModal:not(.hidden) .modal-content-wrapper { transform: translateY(0); }
+
+        /* Toast Notification */
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #000;
+            color: #fff;
+            text-align: center;
+            border-radius: 2px;
+            padding: 16px;
+            position: fixed;
+            z-index: 10000;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            font-size: 14px;
+            letter-spacing: 1px;
+            opacity: 0;
+            transition: opacity 0.5s, bottom 0.5s;
+        }
+        #toast.show {
+            visibility: visible;
+            opacity: 1;
+            bottom: 50px;
+        }
+        
+        /* Button Click Effect */
+        .btn-click-effect:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body class="bg-white text-black">
+
+    <div class="intro-container" id="intro">
+        <div class="intro-content">
+            <div class="intro-logo font-serif">ÉLÉGANCE</div>
+            <div class="intro-divider"></div>
+            <div class="intro-text font-light">OUR COLLECTION</div>
+        </div>
+    </div>
+
+    <nav id="navbar" class="fixed top-0 w-full z-50 bg-black transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex-shrink-0">
+                    <a href="/" class="text-3xl font-serif font-light tracking-widest text-white hover:text-gray-300 transition">ÉLÉGANCE</a>
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="index.html" class="text-white hover:text-gray-300 transition text-sm tracking-wider">HOME</a>
+                    <a href="#products" class="text-white hover:text-gray-300 transition text-sm tracking-wider border-b border-white">PRODUCTS</a>
+                    <a href="#men" class="text-white hover:text-gray-300 transition text-sm tracking-wider">MEN</a>
+                    <a href="#women" class="text-white hover:text-gray-300 transition text-sm tracking-wider">WOMEN</a>
+                    <a href="#sale" class="text-white hover:text-gray-300 transition text-sm tracking-wider">SALE</a>
+                </div>
+                <div class="flex items-center space-x-5">
+                    <button class="text-white hover:text-gray-300 transition"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg></button>
+                    <button class="text-white hover:text-gray-300 transition relative">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                        <span id="cartCount" class="absolute -top-2 -right-2 bg-white text-black text-xs w-5 h-5 rounded-full flex items-center justify-center font-semibold transition-transform duration-200">0</span>
+                    </button>
+                    <button id="mobileMenuBtn" class="md:hidden text-white">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="mobileMenu" class="hidden md:hidden bg-black border-t border-gray-800">
+            <div class="px-4 py-6 space-y-4">
+                <a href="index.html" class="block text-white hover:text-gray-300 text-sm tracking-wider">HOME</a>
+                <a href="#products" class="block text-white hover:text-gray-300 text-sm tracking-wider">PRODUCTS</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="pt-28 pb-8 bg-white border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center text-sm text-gray-500">
+                <a href="/" class="hover:text-black transition">Home</a>
+                <span class="mx-3">/</span>
+                <span class="text-black">Collection</span>
+            </div>
+        </div>
+    </div>
+
+    <section class="py-16 bg-white reveal">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-6xl md:text-7xl font-serif font-light mb-6 tracking-wide">Our Collection</h1>
+            <p class="text-gray-600 text-sm tracking-widest mb-8">DISCOVER TIMELESS ELEGANCE</p>
+        </div>
+    </section>
+
+    <section class="py-8 bg-gray-50 border-y reveal">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="flex flex-wrap gap-3 justify-center">
+                    <button class="filter-btn active px-6 py-2 border-2 border-black text-sm tracking-wider transition hover:bg-black hover:text-white btn-click-effect">ALL</button>
+                    <button class="filter-btn px-6 py-2 border-2 border-black text-sm tracking-wider transition hover:bg-black hover:text-white btn-click-effect">NEW ARRIVALS</button>
+                    <button class="filter-btn px-6 py-2 border-2 border-black text-sm tracking-wider transition hover:bg-black hover:text-white btn-click-effect">MEN</button>
+                    <button class="filter-btn px-6 py-2 border-2 border-black text-sm tracking-wider transition hover:bg-black hover:text-white btn-click-effect">WOMEN</button>
+                </div>
+                <div class="flex items-center gap-3">
+                    <label class="text-sm tracking-wider">SORT BY:</label>
+                    <select class="px-4 py-2 border-2 border-black text-sm tracking-wider focus:outline-none bg-white">
+                        <option>FEATURED</option>
+                        <option>PRICE: LOW TO HIGH</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="products" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                
+                <div class="product-card group reveal" 
+                     onclick="openModal(this)"
+                     data-title="Classic Noir Blazer"
+                     data-category="BLAZERS"
+                     data-price="$499"
+                     data-image="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&q=80"
+                     data-desc="A quintessential piece for the modern wardrobe. This structured blazer features premium wool-blend fabric, satin lapels, and a tailored fit that accentuates the silhouette.">
+                    <div class="relative overflow-hidden bg-gray-50 aspect-[3/4]">
+                        <span class="badge bg-black text-white px-3 py-1 text-xs tracking-widest">NEW</span>
+                        <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&q=80" alt="Blazer" class="product-image w-full h-full object-cover grayscale" loading="lazy"/>
+                        <div class="product-overlay"></div>
+                        <button class="quick-view-btn bg-white text-black px-6 py-3 text-xs tracking-widest hover:bg-gray-100 transition">QUICK VIEW</button>
+                    </div>
+                    <div class="mt-4">
+                        <p class="text-xs text-gray-500 tracking-widest mb-1">BLAZERS</p>
+                        <h3 class="font-serif text-xl mb-2">Classic Noir Blazer</h3>
+                        <div class="flex items-center justify-between">
+                            <p class="text-lg font-semibold">$499</p>
+                            <button class="text-gray-400 hover:text-black transition" onclick="quickAdd(event)"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card group reveal" 
+                     onclick="openModal(this)"
+                     data-title="Essence White Shirt"
+                     data-category="SHIRTS"
+                     data-price="$299"
+                     data-image="https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=600&q=80"
+                     data-desc="Minimalist perfection. Crafted from 100% Egyptian cotton, this crisp white shirt features mother-of-pearl buttons and a hidden placket for a seamless, elegant look.">
+                    <div class="relative overflow-hidden bg-gray-50 aspect-[3/4]">
+                        <img src="https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=600&q=80" alt="Shirt" class="product-image w-full h-full object-cover grayscale" loading="lazy"/>
+                        <div class="product-overlay"></div>
+                        <button class="quick-view-btn bg-white text-black px-6 py-3 text-xs tracking-widest hover:bg-gray-100 transition">QUICK VIEW</button>
+                    </div>
+                    <div class="mt-4">
+                        <p class="text-xs text-gray-500 tracking-widest mb-1">SHIRTS</p>
+                        <h3 class="font-serif text-xl mb-2">Essence White Shirt</h3>
+                        <div class="flex items-center justify-between">
+                            <p class="text-lg font-semibold">$299</p>
+                            <button class="text-gray-400 hover:text-black transition" onclick="quickAdd(event)"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card group reveal" 
+                     onclick="openModal(this)"
+                     data-title="Midnight Elegance"
+                     data-category="DRESSES"
+                     data-price="$449"
+                     data-image="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=600&q=80"
+                     data-desc="Command the room in this stunning evening gown. Featuring a plunging neckline and a dramatic side slit, it pairs perfectly with statement jewelry for black-tie events.">
+                    <div class="relative overflow-hidden bg-gray-50 aspect-[3/4]">
+                        <span class="badge bg-white text-black border border-black px-3 py-1 text-xs tracking-widest">SALE</span>
+                        <img src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=600&q=80" alt="Dress" class="product-image w-full h-full object-cover grayscale" loading="lazy"/>
+                        <div class="product-overlay"></div>
+                        <button class="quick-view-btn bg-white text-black px-6 py-3 text-xs tracking-widest hover:bg-gray-100 transition">QUICK VIEW</button>
+                    </div>
+                    <div class="mt-4">
+                        <p class="text-xs text-gray-500 tracking-widest mb-1">DRESSES</p>
+                        <h3 class="font-serif text-xl mb-2">Midnight Elegance</h3>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <p class="text-lg font-semibold">$449</p>
+                                <p class="text-sm text-gray-400 line-through">$599</p>
+                            </div>
+                            <button class="text-gray-400 hover:text-black transition" onclick="quickAdd(event)"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card group reveal" 
+                     onclick="openModal(this)"
+                     data-title="Royal Trench"
+                     data-category="COATS"
+                     data-price="$799"
+                     data-image="https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=600&q=80"
+                     data-desc="The ultimate transitional piece. This waterproof gabardine trench coat features a heritage check lining, storm shield, and buffalo horn buttons.">
+                    <div class="relative overflow-hidden bg-gray-50 aspect-[3/4]">
+                        <span class="badge bg-black text-white px-3 py-1 text-xs tracking-widest">NEW</span>
+                        <img src="https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=600&q=80" alt="Coat" class="product-image w-full h-full object-cover grayscale" loading="lazy"/>
+                        <div class="product-overlay"></div>
+                        <button class="quick-view-btn bg-white text-black px-6 py-3 text-xs tracking-widest hover:bg-gray-100 transition">QUICK VIEW</button>
+                    </div>
+                    <div class="mt-4">
+                        <p class="text-xs text-gray-500 tracking-widest mb-1">COATS</p>
+                        <h3 class="font-serif text-xl mb-2">Royal Trench</h3>
+                        <div class="flex items-center justify-between">
+                            <p class="text-lg font-semibold">$799</p>
+                            <button class="text-gray-400 hover:text-black transition" onclick="quickAdd(event)"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card group reveal" 
+                     onclick="openModal(this)"
+                     data-title="Oxford Classics"
+                     data-category="FOOTWEAR"
+                     data-price="$399"
+                     data-image="https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=600&q=80"
+                     data-desc="Handcrafted in Italy using full-grain calf leather. These oxfords feature Goodyear welt construction and leather soles for longevity and style.">
+                    <div class="relative overflow-hidden bg-gray-50 aspect-[3/4]">
+                        <img src="https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=600&q=80" alt="Shoes" class="product-image w-full h-full object-cover grayscale" loading="lazy"/>
+                        <div class="product-overlay"></div>
+                        <button class="quick-view-btn bg-white text-black px-6 py-3 text-xs tracking-widest hover:bg-gray-100 transition">QUICK VIEW</button>
+                    </div>
+                    <div class="mt-4">
+                        <p class="text-xs text-gray-500 tracking-widest mb-1">FOOTWEAR</p>
+                        <h3 class="font-serif text-xl mb-2">Oxford Classics</h3>
+                        <div class="flex items-center justify-between">
+                            <p class="text-lg font-semibold">$399</p>
+                            <button class="text-gray-400 hover:text-black transition" onclick="quickAdd(event)"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card group reveal" 
+                     onclick="openModal(this)"
+                     data-title="Signature Tote"
+                     data-category="ACCESSORIES"
+                     data-price="$599"
+                     data-image="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=600&q=80"
+                     data-desc="Spacious and sophisticated. Made from pebbled leather with gold-tone hardware, this tote includes a detachable shoulder strap and internal laptop sleeve.">
+                    <div class="relative overflow-hidden bg-gray-50 aspect-[3/4]">
+                        <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=600&q=80" alt="Bag" class="product-image w-full h-full object-cover grayscale" loading="lazy"/>
+                        <div class="product-overlay"></div>
+                        <button class="quick-view-btn bg-white text-black px-6 py-3 text-xs tracking-widest hover:bg-gray-100 transition">QUICK VIEW</button>
+                    </div>
+                    <div class="mt-4">
+                        <p class="text-xs text-gray-500 tracking-widest mb-1">ACCESSORIES</p>
+                        <h3 class="font-serif text-xl mb-2">Signature Tote</h3>
+                        <div class="flex items-center justify-between">
+                            <p class="text-lg font-semibold">$599</p>
+                            <button class="text-gray-400 hover:text-black transition" onclick="quickAdd(event)"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card group reveal" 
+                     onclick="openModal(this)"
+                     data-title="Essential Tee"
+                     data-category="BASICS"
+                     data-price="$149"
+                     data-image="https://images.unsplash.com/photo-1562157873-818bc0726f68?w=600&q=80"
+                     data-desc="Elevated casual wear. This heavyweight cotton tee features a relaxed boxy fit and double-stitched hems for durability without sacrificing comfort.">
+                    <div class="relative overflow-hidden bg-gray-50 aspect-[3/4]">
+                        <span class="badge bg-black text-white px-3 py-1 text-xs tracking-widest">NEW</span>
+                        <img src="https://images.unsplash.com/photo-1562157873-818bc0726f68?w=600&q=80" alt="T-Shirt" class="product-image w-full h-full object-cover grayscale" loading="lazy"/>
+                        <div class="product-overlay"></div>
+                        <button class="quick-view-btn bg-white text-black px-6 py-3 text-xs tracking-widest hover:bg-gray-100 transition">QUICK VIEW</button>
+                    </div>
+                    <div class="mt-4">
+                        <p class="text-xs text-gray-500 tracking-widest mb-1">BASICS</p>
+                        <h3 class="font-serif text-xl mb-2">Essential Tee</h3>
+                        <div class="flex items-center justify-between">
+                            <p class="text-lg font-semibold">$149</p>
+                            <button class="text-gray-400 hover:text-black transition" onclick="quickAdd(event)"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg></button>
+                        </div>
+                    </div>
+                </div>
+                
+                 <div class="product-card group reveal" onclick="alert('Product details coming soon!')">
+                    <div class="relative overflow-hidden bg-gray-50 aspect-[3/4]">
+                        <span class="badge bg-white text-black border border-black px-3 py-1 text-xs tracking-widest">SALE</span>
+                        <img src="https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=600&q=80" alt="Product" class="product-image w-full h-full object-cover grayscale" loading="lazy"/>
+                        <div class="product-overlay"></div>
+                        <button class="quick-view-btn bg-white text-black px-6 py-3 text-xs tracking-widest hover:bg-gray-100 transition">QUICK VIEW</button>
+                    </div>
+                </div>
+
+            </div>
+            
+            <div class="text-center mt-16 reveal">
+                <button class="bg-black text-white px-12 py-4 text-sm tracking-widest hover:bg-gray-800 transition btn-click-effect">LOAD MORE PRODUCTS</button>
+            </div>
+        </div>
+    </section>
+
+    <div id="productModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeModal()"></div>
+        
+        <div class="modal-content-wrapper relative bg-white w-full max-w-5xl mx-4 md:mx-auto shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
+            <button onclick="closeModal()" class="absolute top-4 right-4 z-10 p-2 hover:bg-gray-100 rounded-full transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2">
+                <div class="bg-gray-100 h-96 md:h-auto">
+                    <img id="modalImage" src="" alt="Product Detail" class="w-full h-full object-cover grayscale">
+                </div>
+                
+                <div class="p-8 md:p-12 flex flex-col justify-center">
+                    <p id="modalCategory" class="text-sm text-gray-500 tracking-widest mb-2">CATEGORY</p>
+                    <h2 id="modalTitle" class="font-serif text-4xl md:text-5xl mb-4">Product Title</h2>
+                    <p id="modalPrice" class="text-2xl font-semibold mb-6">$0.00</p>
+                    
+                    <p id="modalDesc" class="text-gray-600 leading-relaxed mb-8">
+                        Description goes here.
+                    </p>
+                    
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-xs font-bold tracking-widest mb-2">SELECT SIZE</label>
+                            <div class="flex gap-2">
+                                <button class="w-10 h-10 border border-gray-300 hover:border-black flex items-center justify-center text-sm transition focus:bg-black focus:text-white btn-click-effect">S</button>
+                                <button class="w-10 h-10 border border-gray-300 hover:border-black flex items-center justify-center text-sm transition focus:bg-black focus:text-white btn-click-effect">M</button>
+                                <button class="w-10 h-10 border border-gray-300 hover:border-black flex items-center justify-center text-sm transition focus:bg-black focus:text-white btn-click-effect">L</button>
+                                <button class="w-10 h-10 border border-gray-300 hover:border-black flex items-center justify-center text-sm transition focus:bg-black focus:text-white btn-click-effect">XL</button>
+                            </div>
+                        </div>
+                        
+                        <div class="flex gap-4 pt-4 border-t">
+                            <button onclick="addToCartFromModal()" class="flex-1 bg-black text-white py-4 text-sm tracking-widest hover:bg-gray-800 transition btn-click-effect">ADD TO CART</button>
+                            <button class="p-4 border border-gray-300 hover:border-black transition btn-click-effect">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                            </button>
+                        </div>
+                        
+                        <div class="text-xs text-gray-500 space-y-1 pt-4">
+                            <p>Free shipping on orders over $100</p>
+                            <p>30-day return policy</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+        
+    <div id="toast">Item added to cart</div>
+
+    <section class="py-24 bg-black text-white reveal">
+        <div class="max-w-4xl mx-auto px-4 text-center">
+            <h2 class="text-5xl font-serif font-light mb-4 tracking-wide">Stay Updated</h2>
+            <p class="text-gray-400 mb-10 text-sm tracking-widest">SUBSCRIBE FOR EXCLUSIVE OFFERS</p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <input type="email" placeholder="Enter your email" class="px-8 py-4 bg-white text-black flex-grow max-w-md focus:outline-none text-sm tracking-wider"/>
+                <button onclick="alert('Thank you for subscribing!')" class="px-12 py-4 bg-white text-black hover:bg-gray-200 transition tracking-widest font-medium text-sm btn-click-effect">SUBSCRIBE</button>
+            </div>
+        </div>
+    </section>
+        
+    <footer class="bg-black text-gray-400 py-16 border-t border-gray-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="border-t border-gray-900 pt-8 text-center text-sm">
+                <p>&copy; 2025 ÉLÉGANCE. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+        
+    <script>
+        // Intro Animation
+        window.addEventListener('load', function() {
+            setTimeout(function() { document.getElementById('intro').classList.add('hidden'); }, 3000);
+        });
+    
+        // Navbar Scroll Effect
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > 100) navbar.classList.add('nav-scrolled');
+            else navbar.classList.remove('nav-scrolled');
+        });
+    
+        // Mobile Menu
+        document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+            document.getElementById('mobileMenu').classList.toggle('hidden');
+        });
+
+        // --- NEW: Scroll Reveal Animation ---
+        function reveal() {
+            var reveals = document.querySelectorAll(".reveal");
+            for (var i = 0; i < reveals.length; i++) {
+                var windowHeight = window.innerHeight;
+                var elementTop = reveals[i].getBoundingClientRect().top;
+                var elementVisible = 150;
+                if (elementTop < windowHeight - elementVisible) {
+                    reveals[i].classList.add("active");
+                }
+            }
+        }
+        window.addEventListener("scroll", reveal);
+        // Trigger once on load
+        reveal();
+
+        // --- Modal & Cart Logic ---
+        const modal = document.getElementById('productModal');
+        const modalImg = document.getElementById('modalImage');
+        const modalCategory = document.getElementById('modalCategory');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalPrice = document.getElementById('modalPrice');
+        const modalDesc = document.getElementById('modalDesc');
+        
+        let currentProductTitle = ""; // Track what we are looking at
+        let cartCount = 0;
+
+        function openModal(element) {
+            // Populate data
+            modalImg.src = element.dataset.image;
+            modalCategory.innerText = element.dataset.category;
+            modalTitle.innerText = element.dataset.title;
+            modalPrice.innerText = element.dataset.price;
+            modalDesc.innerText = element.dataset.desc;
+            
+            currentProductTitle = element.dataset.title;
+
+            // Show modal
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden'; 
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto'; 
+        }
+
+        // Close on Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === "Escape") closeModal();
+        });
+
+        // --- NEW: Add to Cart Functionality ---
+        function addToCartFromModal() {
+            updateCart();
+            showToast(`Added ${currentProductTitle} to cart`);
+            closeModal();
+        }
+
+        function quickAdd(event) {
+            event.stopPropagation(); // Don't open the modal
+            updateCart();
+            showToast("Item added to cart");
+        }
+
+        function updateCart() {
+            cartCount++;
+            const counterElement = document.getElementById('cartCount');
+            counterElement.innerText = cartCount;
+            
+            // Animate the counter badge
+            counterElement.style.transform = "scale(1.5)";
+            setTimeout(() => {
+                counterElement.style.transform = "scale(1)";
+            }, 200);
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById("toast");
+            toast.innerText = message;
+            toast.className = "show";
+            setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
+        }
+    </script>
+</body>
+</html>
